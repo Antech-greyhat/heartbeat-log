@@ -1,4 +1,4 @@
-# My streak guard. Runs on a schedule and calls the reusable workflow.
+
 name: Streak guard
 
 on:
@@ -9,7 +9,7 @@ on:
     - cron: "23 18 * * *"  # 21:23 Kenya
     - cron: "23 20 * * *"  # 23:23 Kenya
     - cron: "37 22 * * *"  # 01:37 Kenya - last backup before the UTC day ends (03:00 Kenya)
-  # Adds the "Run workflow" button in the Actions tab.
+
   workflow_dispatch:
     inputs:
       force:
@@ -17,20 +17,20 @@ on:
         type: boolean
         default: false
 
-# Let the bot push commits to this repo.
+
 permissions:
   contents: write
 
 jobs:
   heartbeat:
-    # Call the tool, pinned to the v1 tag (not @main).
+  
     uses: Antech-greyhat/commit-heartbeat/.github/workflows/heartbeat.yml@v1
-    # The called job also needs write access.
+    
     permissions:
       contents: write
     with:
-      # Scheduled runs have no inputs, so this becomes false for them.
+      
       force: ${{ inputs.force == true }}
       target: 15
-    # Pass GIT_USER_NAME, GIT_USER_EMAIL, GH_USERNAME (and CONTRIB_TOKEN if set).
+    
     secrets: inherit
