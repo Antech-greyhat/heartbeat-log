@@ -24,13 +24,16 @@ permissions:
 jobs:
   heartbeat:
   
-    uses: Antech-greyhat/commit-heartbeat/.github/workflows/heartbeat.yml@v1
+    uses: Antech-greyhat/commit-heartbeat/.github/workflows/heartbeat.yml@v2
     
     permissions:
       contents: write
     with:
       
       force: ${{ inputs.force == true }}
-      target: 15
+      target: 20
+      per_run: 3          # each run makes up to 3 commits
+      # The 22:37 UTC run is the last backup: it tops up to 20.
+      final_run: ${{ github.event.schedule == '37 22 * * *' }}
     
     secrets: inherit
