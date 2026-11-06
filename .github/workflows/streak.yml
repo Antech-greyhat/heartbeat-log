@@ -1,41 +1,43 @@
-
+# Copy this AND .github/workflows/heartbeat.yml into your repository.
 name: Streak guard
 
 on:
-  # Times are UTC. Kenya = UTC+3. Odd minutes avoid the busy :00 slot.
-  # GitHub often starts these 1-3 hours late, so the final run sits ~4h before
-  # the UTC day ends (03:00 Kenya) instead of right next to it.
+  # UTC (Kenya = UTC+3). Four normal runs can reach 20; the fifth is a backup.
+  # GitHub can delay or skip schedules, so the daily target is best effort.
   schedule:
     - cron: "17 4 * * *"   # 07:17 Kenya
     - cron: "17 8 * * *"   # 11:17 Kenya
     - cron: "23 12 * * *"  # 15:23 Kenya
     - cron: "23 16 * * *"  # 19:23 Kenya
     - cron: "37 19 * * *"  # 22:37 Kenya - final backup
-
   workflow_dispatch:
     inputs:
       force:
-        description: "Make a test commit even if I was already active today"
+        description: "Make exactly one test commit (dry run previews it)"
         type: boolean
         default: false
-
+      dry_run:
+        description: "Preview the plan without creating or pushing commits"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
 
 jobs:
   heartbeat:
-  
-    uses: Antech-greyhat/commit-heartbeat/.github/workflows/heartbeat.yml@v3
-    
+    # A local call runs the matching implementation from this same revision.
+    uses: ./.github/workflows/heartbeat.yml
     permissions:
       contents: write
     with:
-      
       force: ${{ inputs.force == true }}
+      dry_run: ${{ inputs.dry_run == true }}
       target: 20
-      per_run: 3          # each run makes up to 3 commits
-      # The 19:37 UTC run is the last backup: it tops up to 20.
+      per_run: 5
       final_run: ${{ github.event.schedule == '37 19 * * *' }}
-    
-    secrets: inherit
+    secrets:
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      GH_USERNAME: ${{ secrets.GH_USERNAME }}
+      CONTRIB_TOKEN: ${{ secrets.CONTRIB_TOKEN }}
